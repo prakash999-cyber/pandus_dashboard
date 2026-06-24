@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="base:app_id" content="6a3b6a36664da9c3731e1c72" />
+    <title>Base Passport | Onchain Reputation Engine</title>
+
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css?v=7">
+    <link rel="stylesheet" href="style.css">
+    
+    <script>
+        // WEB3 CONFIGURATION: Set your deployed BaseTransactionManager contract address here
+        window.baseContractAddress = ""; // e.g., "0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5"
+        window.baseReceiverAddress = "0x1387856FfB7eDB08Aa5492Bce38e83B0c3a85684"; // Fallback wallet address
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#blue-gradient)" />
+                        <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="url(#blue-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="blue-gradient" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#0052FF" />
+                                <stop offset="1" stop-color="#00F0FF" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>BASE PASSPORT</h1>
+                    <span style="text-transform: none; letter-spacing: 0.5px; opacity: 0.8;">by pandus</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <span class="nav-icon">🏠</span> Dashboard
+                </a>
+                <!-- Mobile-only: Passport shortcut (hidden on desktop/laptop) -->
+                <a href="#" class="nav-item mobile-only-nav" id="nav-passport-mobile" data-tab="passport">
+                    <span class="nav-icon">🪪</span> Passport
+                </a>
+                <a href="#" class="nav-item" data-tab="airdrop">
+                    <span class="nav-icon">📊</span> Airdrop Score
+                </a>
+                <a href="#" class="nav-item" data-tab="rewards">
+                    <span class="nav-icon">💰</span> BXP Rewards
+                </a>
+                <a href="#" class="nav-item" data-tab="games">
+                    <span class="nav-icon">🎲</span> Daily Games
+                </a>
+                <a href="#" class="nav-item" data-tab="leaderboard">
+                    <span class="nav-icon">🏆</span> Leaderboards
+                </a>
+                <a href="#" class="nav-item" data-tab="referrals">
+                    <span class="nav-icon">👥</span> Referrals
+                </a>
+                <a href="#" class="nav-item" data-tab="badges">
+                    <span class="nav-icon">🎖</span> Badges
+                </a>
+                <a href="#" class="nav-item" data-tab="transactions">
+                    <span class="nav-icon">💳</span> Transactions
+                </a>
+                <a href="#" class="nav-item" id="nav-support-trigger">
+                    <span class="nav-icon">💬</span> Support
+                </a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <div class="promo-glow"></div>
+                <div class="promo-box">
+                    <div class="promo-icon">🎁</div>
+                    <h4>Invite friends,<br>earn more rolls!</h4>
+                    <button class="btn btn-primary btn-sm btn-block" id="promo-invite-btn">Invite Now</button>
+                </div>
+            </div>
+
+
+        </aside>
+
+        <!-- Sidebar mobile overlay -->
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+        <!-- Main Workspace -->
+        <div class="main-workspace">
+            <!-- Header -->
+            <header class="app-header">
+                <button id="btn-toggle-sidebar" class="btn-menu-toggle">
+                    <span>☰</span>
+                </button>
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="wallet-search-input" placeholder="Search Wallet / ENS / Twitter" autocomplete="off">
+                    <span class="search-shortcut">Ctrl K</span>
+                    <div id="search-suggestions" class="search-suggestions hidden"></div>
+                    <span class="search-helper-text">📌 Quick Checks: <a href="#" id="search-mock-x-link" style="color: var(--color-cyan); text-decoration: underline; font-weight: 500; margin-right: 6px;">Scan X Mentions</a> | <a href="#" id="search-mock-check-link" style="color: var(--color-cyan); text-decoration: underline; font-weight: 500; margin-left: 6px;">Check Base Wallet</a></span>
+                </div>
+
+                <div class="header-actions">
+                    <div class="action-btn notifications-btn">
+                        <span class="icon">🔔</span>
+                        <span class="badge">3</span>
+                        <div class="notifications-dropdown hidden">
+                            <div class="dropdown-header">
+                                <h3>Notifications</h3>
+                                <a href="#" class="mark-all-read">Mark all read</a>
+                            </div>
+                            <div class="notifications-list">
+                                <div class="notification-item unread">
+                                    <span class="notif-icon">🎉</span>
+                                    <div class="notif-content">
+                                        <p>You qualified for the <strong>LayerZero</strong> Phase 2 claim!</p>
+                                        <span class="notif-time">2 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="notification-item unread">
+                                    <span class="notif-icon">🎲</span>
+                                    <div class="notif-content">
+                                        <p>Your daily dice rolls have refreshed. <strong>2 rolls remaining</strong>.</p>
+                                        <span class="notif-time">5 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="notification-item unread">
+                                    <span class="notif-icon">⚡</span>
+                                    <div class="notif-content">
+                                        <p>Check-in reward is available. Claim your daily streak BXP!</p>
+                                        <span class="notif-time">19 hours ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+
+                    <div class="bxp-balance-premium">
+                        <span class="xp-icon" style="color: var(--color-purple); font-size: 16px;">💎</span>
+                        <div class="xp-details">
+                            <span class="xp-value" id="header-bxp" style="color: #a78bfa; font-weight: 700;">0 BXP</span>
+                            <span class="xp-label" style="font-size: 8px; color: var(--text-secondary); text-transform: uppercase;">Total BXP</span>
+                        </div>
+                    </div>
+
+                    <div id="rainbow-wallet-container" style="display: none;"></div>
+                    <div style="position: relative; display: flex; align-items: center; justify-content: center; height: 100%;">
+                        <button id="header-connect-wallet-btn" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px; font-weight: 700; background: linear-gradient(135deg, #0052FF 0%, #0040CC 100%); border: none; box-shadow: 0 4px 14px rgba(0, 82, 255, 0.4); border-radius: 8px; color: #fff; padding: 10px 16px; cursor: pointer; transition: all 0.2s ease;" onclick="document.getElementById('connect-wallet-modal').classList.remove('hidden')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="2" y="5" width="20" height="14" rx="3" stroke="white" stroke-width="1.8"/>
+                                <rect x="16" y="10" width="5" height="5" rx="1.5" fill="white"/>
+                                <line x1="2" y1="9" x2="22" y2="9" stroke="white" stroke-width="1.8"/>
+                            </svg>
+                            Connect Wallet
+                        </button>
+                        
+                        <div class="wallet-dropdown hidden" id="wallet-dropdown-menu">
+                            <div class="wallet-drop-header">
+                                <h4>Wallet Details</h4>
+                                <span class="net-badge" id="wallet-provider-label">MetaMask</span>
+                            </div>
+                            <div class="wallet-drop-body">
+                                <div class="full-address" id="wallet-full-address">No Wallet Connected</div>
+                                <div class="balance-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 8px; color: var(--text-secondary);">
+                                    <span>Balance:</span>
+                                    <strong id="wallet-balance" style="color: #fff;">0.000 ETH</strong>
+                                </div>
+                                <a href="#" id="wallet-basescan-link" target="_blank" class="card-link" style="font-size: 11px; display: block; margin-top: 10px; color: var(--color-cyan);">View on Basescan ↗</a>
+                            </div>
+                            <button class="btn btn-outline btn-sm btn-block" id="btn-disconnect-wallet" style="display: none; width: 100%; font-size: 11px; padding: 10px; border: 1.5px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05); color: #ef4444; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.15)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.05)'">Disconnect</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="dashboard-content tab-content" id="tab-dashboard">
+                <!-- Growth Hack Banners -->
+                <div class="dashboard-welcome-banners">
+                    <!-- Banner 1: Sybil Protection Speculation -->
+                    <div class="welcome-banner glow-blue">
+                        <div class="banner-icon-wrapper">
+                            <span class="banner-icon">🛡️</span>
+                        </div>
+                        <div class="banner-body">
+                            <h4>Base Sybil-Protection Credential</h4>
+                            <p>Proving a Base Passport score above 80 shields your wallet from automated Sybil bot filters in upcoming ecosystem drops and partner protocols.</p>
+                        </div>
+                        <div class="banner-badge">Reputation Verified</div>
+                    </div>
+                    <!-- Banner 2: Referral Loop -->
+                    <div class="welcome-banner glow-cyan">
+                        <div class="banner-icon-wrapper">
+                            <span class="banner-icon">🔗</span>
+                        </div>
+                        <div class="banner-body">
+                            <h4>BXP Referral Commission Loop Active</h4>
+                            <p>Invite friends and earn a **flat +50 BXP** plus a **30% commission** on all BXP they collect, added to your wallet in real-time!</p>
+                        </div>
+                        <button class="btn btn-primary btn-sm btn-banner-go" id="btn-banner-go-ref">Invite Friends</button>
+                    </div>
+                </div>
+
+                <!-- Top Row: Overview Metrics -->
+                <section class="metrics-grid">
+                    <!-- Metric Card 1: Airdrop Score -->
+                    <div class="metric-card glow-blue">
+                        <div class="metric-info">
+                            <span class="metric-label">AIRDROP SCORE</span>
+                            <div class="metric-value-row">
+                                <h2 class="metric-value" id="metric-airdrop-score" style="font-size: 42px; font-weight: 800; color: var(--color-cyan); text-shadow: 0 0 12px rgba(0, 243, 255, 0.4); line-height: 1.2; margin-bottom: 6px;">0</h2>
+                            </div>
+                            <span class="metric-subtext success" id="metric-airdrop-badge" style="color: var(--text-muted);">Connect Wallet 🔗</span>
+                        </div>
+                        <div class="metric-graphic">
+                            <div class="cube-wrapper">
+                                <div class="glass-cube">
+                                    <div class="face front"></div>
+                                    <div class="face back"></div>
+                                    <div class="face right"></div>
+                                    <div class="face left"></div>
+                                    <div class="face top"></div>
+                                    <div class="face bottom"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Metric Card 2: Daily Check-in -->
+                    <div class="metric-card glow-purple" id="checkin-metric-card">
+                        <div class="metric-info">
+                            <span class="metric-label">DAILY CHECK-IN</span>
+                            <h2 class="metric-value" style="font-size: 20px;">
+                                <span class="checkin-timer-display" style="font-family: monospace; font-size: 18px;">Loading...</span>
+                            </h2>
+                            <div style="display: flex; gap: 4px; margin-top: 6px;" id="streak-dots-header">
+                                <span style="font-size: 10px; color: var(--text-secondary);">Day streak:</span>
+                                <span style="font-size: 12px;" id="streak-indicator-header">● ○ ○ ○ ○ ○ ○</span>
+                            </div>
+                        </div>
+                        <div class="metric-graphic">
+                            <button class="btn btn-primary btn-checkin-action" style="font-size: 11px; padding: 8px 14px;">Check-in</button>
+                        </div>
+                    </div>
+
+                    <!-- Metric Card 3: Base Mentions -->
+                    <div class="metric-card glow-cyan" id="mentions-metric-card">
+                        <div class="metric-info">
+                            <span class="metric-label">BASE MENTIONS</span>
+                            <h2 class="metric-value" id="metric-mentions" style="color: var(--text-secondary);">—</h2>
+                            <span class="metric-subtext" id="metric-mentions-sub">Scan X handle in search bar</span>
+                            <div style="margin-top: 4px;">
+                                <span class="scan-x-badge" id="btn-scan-x-trigger">🔍 SCAN NOW</span>
+                            </div>
+                        </div>
+                        <div class="metric-graphic twitter-x-logo">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Metric Card 4: Sybil Rating -->
+                    <div class="metric-card glow-green">
+                        <div class="metric-info">
+                            <span class="metric-label">SYBIL RATING</span>
+                            <h2 class="metric-value text-green" id="metric-sybil" style="color: var(--text-muted);">—</h2>
+                            <span class="metric-subtext success" style="color: var(--text-muted);">Connect wallet to verify</span>
+                        </div>
+                        <div class="metric-graphic shield-logo">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="44" height="44">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(0, 240, 255, 0.05)"/>
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <path d="M9 12l2 2 4-4" stroke="#10B981" stroke-width="2.5"/>
+                            </svg>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Middle Section: Three Columns (Wallet Analytics, Activity, Daily Widgets) -->
+                <section class="dashboard-grid-middle">
+                    <!-- Column 1: Wallet Overview -->
+                    <div class="card glass-card wallet-overview-card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="card-icon">💼</span>
+                                <h3>Wallet Overview</h3>
+                            </div>
+                            <a href="#" class="card-link" id="btn-view-details">View Details</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="overview-list">
+                                <div class="overview-item">
+                                    <div class="item-left">
+                                        <span class="item-icon">📅</span>
+                                        <div class="item-info">
+                                            <span class="item-label">Wallet Age</span>
+                                            <span class="item-subtext" id="stat-wallet-age-sub">No transaction history</span>
+                                        </div>
+                                    </div>
+                                    <span class="item-value" id="stat-wallet-age">0 Days</span>
+                                </div>
+                                <div class="overview-item">
+                                    <div class="item-left">
+                                        <span class="item-icon">📊</span>
+                                        <div class="item-info">
+                                            <span class="item-label">Total Transactions</span>
+                                            <span class="item-subtext" id="stat-txs-sub">0 this week</span>
+                                        </div>
+                                    </div>
+                                    <span class="item-value" id="stat-txs">0</span>
+                                </div>
+                                <div class="overview-item">
+                                    <div class="item-left">
+                                        <span class="item-icon">🔄</span>
+                                        <div class="item-info">
+                                            <span class="item-label">Avg. Weekly Tx</span>
+                                            <span class="item-subtext" id="stat-weekly-txs-sub">0 / month</span>
+                                        </div>
+                                    </div>
+                                    <span class="item-value" id="stat-weekly-txs">0</span>
+                                </div>
+                                <div class="overview-item">
+                                    <div class="item-left">
+                                        <span class="item-icon">💰</span>
+                                        <div class="item-info">
+                                            <span class="item-label">Total Volume</span>
+                                            <span class="item-subtext" id="stat-volume-sub">No volume</span>
+                                        </div>
+                                    </div>
+                                    <span class="item-value" id="stat-volume">$0</span>
+                                </div>
+                                <div class="overview-item">
+                                    <div class="item-left">
+                                        <span class="item-icon">🏰</span>
+                                        <div class="item-info">
+                                            <span class="item-label">Protocols Used</span>
+                                            <span class="item-subtext">Base ecosystem</span>
+                                        </div>
+                                    </div>
+                                    <span class="item-value" id="stat-protocols">0 Protocols</span>
+                                </div>
+                                <div class="overview-item">
+                                    <div class="item-left">
+                                        <span class="item-icon">⛽</span>
+                                        <div class="item-info">
+                                            <span class="item-label">Gas Fees Paid</span>
+                                            <span class="item-subtext">Base optimized</span>
+                                        </div>
+                                    </div>
+                                    <span class="item-value text-purple" id="stat-fee-spent">$0.00</span>
+                                </div>
+                                <div class="overview-item">
+                                    <div class="item-left">
+                                        <span class="item-icon">🧪</span>
+                                        <div class="item-info">
+                                            <span class="item-label">Base Testnet User</span>
+                                            <span class="item-subtext">Developer activity</span>
+                                        </div>
+                                    </div>
+                                    <span class="item-value text-red" id="stat-testnet-user">Not Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Base Passport Card -->
+                    <div class="card glass-card passport-card">
+                        <div class="passport-title-header">BASE PASSPORT</div>
+                        
+                        <!-- Round Green Ink Passport Stamp Seal (Top Right Corner) -->
+                        <div class="passport-stamp-seal-green hidden" id="passport-stamp-seal">
+                            <div class="stamp-seal-inner">
+                                <span class="stamp-seal-title">BASE CITIZEN</span>
+                                <span class="stamp-seal-status">★ APPROVED ★</span>
+                                <span class="stamp-seal-date" id="passport-stamp-date">12 APR 2025</span>
+                                <span class="stamp-seal-org">BASE APP ONCHAIN</span>
+                            </div>
+                        </div>
+
+                        <div class="card-body passport-body">
+                            <!-- Column 1: Profile & Socials -->
+                            <div class="passport-avatar-column">
+                                <div class="passport-avatar-area">
+                                    <div class="passport-avatar-circle">
+                                        <img src="avatar.png" alt="Passport Photo" class="passport-avatar-img" id="passport-avatar-img">
+                                    </div>
+                                    <div class="passport-level-badge" id="passport-level">Lv.0</div>
+                                </div>
+                                
+                                <div class="passport-address-pill">
+                                    <span class="passport-address-icon">🔑</span>
+                                    <span class="passport-address-text" id="passport-address-val">— Not Connected —</span>
+                                    <button class="btn-copy-passport-address" id="btn-copy-passport-addr" title="Copy Wallet Address" style="margin-right: 4px;">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 11px; height: 11px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    </button>
+                                    <a href="#" id="passport-basescan-btn" target="_blank" title="View on Basescan" style="display: inline-flex; align-items: center; justify-content: center; background: none; border: none; color: var(--text-muted); cursor: pointer; transition: color 0.2s;">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 11px; height: 11px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                    </a>
+                                </div>
+                                
+                                <div class="passport-social-links">
+                                    <a href="#" class="social-circle-link" id="btn-share-x-new" target="_blank" title="Share on X">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                    </a>
+                                    <a href="#" class="social-circle-link" id="btn-share-tg-new" target="_blank" title="Share on Telegram">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.62.15-.15 2.72-2.5 2.77-2.7.01-.03.01-.15-.06-.21-.07-.06-.17-.04-.25-.02-.11.02-1.92 1.23-5.43 3.6-.51.35-.97.52-1.38.51-.46-.01-1.33-.26-1.98-.47-.8-.26-1.42-.4-1.36-.85.03-.23.35-.47.95-.71 3.71-1.62 6.19-2.69 7.42-3.22 3.53-1.5 4.26-1.76 4.74-1.77.11 0 .35.03.5.15.13.12.17.29.19.41.02.08.02.26 0 .4z"/></svg>
+                                    </a>
+                                    <button class="social-circle-link" id="btn-share-discord-new" title="Copy share message for Discord">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.094 13.094 0 0 1-1.873-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 1-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/></svg>
+                                    </button>
+                                    <button class="social-circle-link" id="btn-save-passport-new" title="Mint & Save Passport ($0.01)">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Column 2: Detailed Data Grid -->
+                            <div class="passport-details-grid">
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">NAME / ENS</span>
+                                    <strong class="grid-item-value" id="passport-name">Verify Wallet</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">CITIZEN RANK</span>
+                                    <strong class="grid-item-value" id="passport-rank-grid-val">—</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">DATE JOINED</span>
+                                    <strong class="grid-item-value" id="passport-joined-val">—</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">WALLET AGE</span>
+                                    <strong class="grid-item-value" id="passport-age-val">—</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">TOTAL VOLUME</span>
+                                    <strong class="grid-item-value" id="passport-volume-val">$0</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">TOTAL TRANSACTIONS</span>
+                                    <strong class="grid-item-value text-purple" id="passport-gas-val">0 Tx</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">GAS FEES PAID</span>
+                                    <strong class="grid-item-value text-purple" id="passport-fee-val">$0.00</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">BASE NFT HOLDINGS</span>
+                                    <strong class="grid-item-value text-blue" id="passport-nfts-val">0 NFTs</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">X MENTIONS</span>
+                                    <strong class="grid-item-value text-cyan" id="passport-mentions-val">—</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">SYBIL RATING</span>
+                                    <strong class="grid-item-value" id="passport-sybil-val">—</strong>
+                                </div>
+                                <div class="passport-grid-item">
+                                    <span class="grid-item-label">ONCHAIN VERIFY</span>
+                                    <strong class="grid-item-value text-red" id="passport-verify-val">Unverified</strong>
+                                </div>
+                            </div>
+                            
+                            <!-- Column 3: Score Panel & Larger Saturn Planet -->
+                            <div class="passport-score-container">
+                                <div class="passport-score-card">
+                                    <div class="score-card-header">
+                                        <span>BASE SCORE</span>
+                                        <span class="score-info-icon" title="Your overall reputation rating calculated out of 97 points based on OP, ARB, and STRK criteria">ⓘ</span>
+                                    </div>
+                                    <div class="score-card-body">
+                                        <div class="score-value-area">
+                                            <h1 class="score-big-val" id="passport-score-val">0</h1>
+                                            <div class="score-rank-badge">
+                                                <span class="rank-badge-trophy">🏆</span>
+                                                <span id="passport-rank-val">—</span>
+                                            </div>
+                                            <span class="score-rank-sub">Among All Base Users</span>
+                                            
+                                            <!-- Viral Share on X Button -->
+                                            <div class="score-share-cta">
+                                                <button class="btn btn-x-viral" id="btn-share-x-viral">
+                                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="margin-right: 4px; vertical-align: middle;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                                    Share on X (+100 BXP)
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Larger Saturn Planet sphere and rotating ring -->
+                                        <div class="saturn-planet-wrapper">
+                                            <div class="saturn-planet-sphere"></div>
+                                            <div class="saturn-planet-ring"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                    <div style="margin-top: 15px; width: 100%;">
+                        <button class="btn btn-primary" id="btn-claim-passport-main" style="width: 100%; font-size: 15px; font-weight: 700; padding: 14px; background: linear-gradient(135deg, #0052FF 0%, #8b5cf6 100%); border: none; box-shadow: 0 4px 15px rgba(0, 82, 255, 0.4); border-radius: 10px; display: none; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease;">
+                            Claim Passport
+                        </button>
+                    </div>
+
+                    <!-- Column 3: Daily Tasks Column Removed From Front Dashboard -->
+                </section>
+
+                <!-- Bottom Section: Airdrop Eligibility, Reputation Engine, Leaderboard & Badges -->
+                <section class="dashboard-grid-bottom">
+                    <!-- Eligibility List -->
+                    <div class="card glass-card eligibility-card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="card-icon">✈️</span>
+                                <h3>Airdrop Eligibility Comparison</h3>
+                            </div>
+                            <a href="#" class="card-link" id="btn-view-all-eligibility">View All</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="eligibility-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Project</th>
+                                            <th>Activity Check</th>
+                                            <th>Bridge Check</th>
+                                            <th>Holding Check</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="eligibility-table-body">
+                                        <!-- Row 1: Arbitrum -->
+                                        <tr>
+                                            <td>
+                                                <div class="project-col">
+                                                    <span class="proj-logo arb">A</span>
+                                                    <strong>Arbitrum (ARB)</strong>
+                                                </div>
+                                            </td>
+                                            <td>0 Tx (❌)</td>
+                                            <td>Bridged 0 ETH (❌)</td>
+                                            <td>0.0000 ETH (❌)</td>
+                                            <td><span class="badge-status status-warning">❌ Ineligible</span></td>
+                                        </tr>
+                                        <!-- Row 2: Optimism -->
+                                        <tr>
+                                            <td>
+                                                <div class="project-col">
+                                                    <span class="proj-logo op">O</span>
+                                                    <strong>Optimism (OP)</strong>
+                                                </div>
+                                            </td>
+                                            <td>0 Tx (❌)</td>
+                                            <td>Bridged 0 ETH (❌)</td>
+                                            <td>0.0000 ETH (❌)</td>
+                                            <td><span class="badge-status status-warning">❌ Ineligible</span></td>
+                                        </tr>
+                                        <!-- Row 3: LayerZero -->
+                                        <tr>
+                                            <td>
+                                                <div class="project-col">
+                                                    <span class="proj-logo l0">L</span>
+                                                    <strong>LayerZero (ZRO)</strong>
+                                                </div>
+                                            </td>
+                                            <td>0 Tx (❌)</td>
+                                            <td>Bridged 0 ETH (❌)</td>
+                                            <td>0.0000 ETH (❌)</td>
+                                            <td><span class="badge-status status-warning">❌ Ineligible</span></td>
+                                        </tr>
+                                        <!-- Row 4: Zora -->
+                                        <tr>
+                                            <td>
+                                                <div class="project-col">
+                                                    <span class="proj-logo zora">Z</span>
+                                                    <strong>Zora (ZORA)</strong>
+                                                </div>
+                                            </td>
+                                            <td>0 Tx (❌)</td>
+                                            <td>Bridged 0 ETH (❌)</td>
+                                            <td>0.0000 ETH (❌)</td>
+                                            <td><span class="badge-status status-warning">❌ Ineligible</span></td>
+                                        </tr>
+                                        <!-- Row 5: Hyperlane -->
+                                        <tr>
+                                            <td>
+                                                <div class="project-col">
+                                                    <span class="proj-logo hyper">H</span>
+                                                    <strong>Hyperlane (HYPER)</strong>
+                                                </div>
+                                            </td>
+                                            <td>0 Tx (❌)</td>
+                                            <td>Bridged 0 ETH (❌)</td>
+                                            <td>0.0000 ETH (❌)</td>
+                                            <td><span class="badge-status status-warning">❌ Ineligible</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OG NFT Holder Card -->
+                    <div class="card glass-card og-nft-card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="card-icon">🏆</span>
+                                <h3>Special OG NFT Holder</h3>
+                            </div>
+                        </div>
+                        <div class="og-nft-body" id="og-nft-body">
+                            <!-- NFT badge items -->
+                            <div class="nft-badge-item active-held" id="nft-builder" style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 14px;">
+                                <span style="font-size: 28px;">🛠️</span>
+                                <div>
+                                    <strong style="font-size: 13px;">Base Builder NFT</strong>
+                                    <span style="display: block; font-size: 10px; color: var(--text-secondary); margin-top: 2px;">Contract: <span style="font-family: monospace; color: var(--color-cyan);" title="0x8DC80A209A3362f0586e6C116973Bb6908170c84">0x8DC8...0c84</span></span>
+                                    <span style="display: block; font-size: 9px; color: var(--text-muted); margin-top: 1px;">252k holders</span>
+                                    <span style="display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-top: 4px;" id="nft-builder-badge">Checking...</span>
+                                </div>
+                            </div>
+                            <div class="nft-badge-item active-held" id="nft-beta" style="display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 14px;">
+                                <span style="font-size: 28px;">🧪</span>
+                                <div>
+                                    <strong style="font-size: 13px;">Beta Access NFT</strong>
+                                    <span style="display: block; font-size: 10px; color: var(--text-secondary); margin-top: 2px;">Contract: <span style="font-family: monospace; color: var(--color-cyan);" title="0xe3EB165C9ED6D6D87A59C410C8F30bABac44FeFD">0xe3EB...eFD</span></span>
+                                    <span style="display: block; font-size: 9px; color: var(--text-muted); margin-top: 1px;">188k holders</span>
+                                    <span style="display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-top: 4px;" id="nft-beta-badge">Checking...</span>
+                                </div>
+                            </div>
+                            <!-- Classification Panel -->
+                            <div class="nft-classification" id="nft-classification" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 14px; text-align: center;">
+                                <div style="font-size: 24px; margin-bottom: 6px;" id="nft-title-icon">👤</div>
+                                <strong style="font-size: 14px;" id="nft-title">Base Pleb</strong>
+                                <p style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;" id="nft-description">Hold NFTs to unlock higher status.</p>
+                                <button class="btn btn-outline btn-sm" style="margin-top: 10px; display: none;" id="btn-collect-nft-xp">🎁 Collect 100 XP Bonus</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Right: Badges Only -->
+                    <div class="misc-column">
+
+                        <!-- Roles Card -->
+                        <div class="card glass-card roles-card">
+                            <div class="card-header">
+                                <div class="card-title-group">
+                                    <span class="card-icon">🆔</span>
+                                    <h3>Base Verified Roles</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="roles-list-container" id="roles-card-container">
+                                    <!-- Rendered dynamically by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </section>
+
+            <footer class="content-footer">
+                <p>Not affiliated with Base or Coinbase. Airdrop estimates are speculative.</p>
+            </footer>
+        </main>
+
+            <!-- Mobile-only Passport Tab -->
+            <main class="dashboard-content tab-content hidden" id="tab-passport">
+                <!-- The passport-card will be dynamically moved here on mobile -->
+            </main>
+
+            <!-- Other Tabs (Simulated/Placeholder pages with return home functionality) -->
+            <main class="dashboard-content tab-content hidden" id="tab-airdrop">
+                <div class="airdrop-analyzer-container">
+                    <div class="section-header-row">
+                        <div class="title-group">
+                            <h2>📊 Airdrop Score & Activity footprints</h2>
+                            <p>Detailed breakdown of active on-chain days and protocol interactions.</p>
+                        </div>
+                        <button class="btn btn-outline btn-back-home">Back to Dashboard</button>
+                    </div>
+
+                    <div class="airdrop-scores-grid">
+                        <!-- Left card: Total score -->
+                        <div class="card glass-card airdrop-summary-card">
+                            <div class="card-body">
+                                <span class="score-label">AIRDROP ACTIVITY SCORE</span>
+                                <div class="score-main-row">
+                                    <h1 class="score-big" id="airdrop-activity-score-val">0</h1>
+                                    <span class="score-badge" id="airdrop-activity-score-badge" style="color: var(--text-muted);">Connect Wallet 🔗</span>
+                                </div>
+                                <p class="score-desc">Based on your frequency of active days, contract diversity, and network coverage on Base.</p>
+                                
+                                <div class="sub-metrics-list">
+                                    <div class="sub-metric-item">
+                                        <div class="sub-metric-info">
+                                            <span>Active Days Score</span>
+                                            <strong id="sub-score-days">0/100</strong>
+                                        </div>
+                                        <div class="progress-bar-container"><div class="progress-bar-fill fill-blue" id="sub-bar-days" style="width: 0%;"></div></div>
+                                    </div>
+                                    <div class="sub-metric-item">
+                                        <div class="sub-metric-info">
+                                            <span>Contract Interactions</span>
+                                            <strong id="sub-score-contracts">0/100</strong>
+                                        </div>
+                                        <div class="progress-bar-container"><div class="progress-bar-fill fill-cyan" id="sub-bar-contracts" style="width: 0%;"></div></div>
+                                    </div>
+                                    <div class="sub-metric-item">
+                                        <div class="sub-metric-info">
+                                            <span>Gas Contribution</span>
+                                            <strong id="sub-score-gas">0/100</strong>
+                                        </div>
+                                        <div class="progress-bar-container"><div class="progress-bar-fill fill-purple" id="sub-bar-gas" style="width: 0%;"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right card: Quick stats -->
+                        <div class="card glass-card airdrop-stats-card">
+                            <div class="card-header-simple">
+                                <h3>Footprint Statistics</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="footprint-stats-grid">
+                                    <div class="f-stat-card">
+                                        <span class="f-stat-val text-blue" id="f-stat-active-days">0 days</span>
+                                        <span class="f-stat-lbl">Active Days (Footprints)</span>
+                                    </div>
+                                    <div class="f-stat-card">
+                                        <span class="f-stat-val text-green" id="f-stat-weeks">0 weeks</span>
+                                        <span class="f-stat-lbl">Active Weeks</span>
+                                    </div>
+                                    <div class="f-stat-card">
+                                        <span class="f-stat-val text-purple" id="f-stat-ratio">0%</span>
+                                        <span class="f-stat-lbl">Activity Density</span>
+                                    </div>
+                                    <div class="f-stat-card">
+                                        <span class="f-stat-val text-gold" id="f-stat-streak">0 days</span>
+                                        <span class="f-stat-lbl">Current Streak</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Downside: Calendar Footprint Card -->
+                    <div class="card glass-card calendar-card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="card-icon">👣</span>
+                                <h3>On-Chain Activity Footprint Calendar</h3>
+                            </div>
+                            <div class="calendar-legend">
+                                <span class="legend-item"><span class="legend-dot active">👣</span> Footprint (Active Day)</span>
+                                <span class="legend-item"><span class="legend-dot idle"></span> Idle Day</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="calendar-months-grid" id="calendar-heatmap-container">
+                                <!-- Calendar months will be generated dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <main class="dashboard-content tab-content hidden" id="tab-games">
+                <div class="games-arcade-container">
+                    <div class="section-header-row">
+                        <div class="title-group">
+                            <h2>🎲 Daily Games Arcade</h2>
+                            <p>Interact with daily tasks to earn BXP multipliers and level up your on-chain reputation.</p>
+                        </div>
+                        <button class="btn btn-outline btn-back-home">Back to Dashboard</button>
+                    </div>
+
+                    <div class="games-arcade-grid">
+                        <!-- Game 1: Boost your Activity -->
+                        <div class="card glass-card arcade-game-card">
+                            <div class="arcade-game-header">
+                                <div>
+                                    <span class="game-tag tag-checkin" style="background: rgba(0, 240, 255, 0.15); color: var(--color-cyan);">Activity Booster</span>
+                                    <h3>Boost your Activity</h3>
+                                    <p>Perform smart contract interactions on Base to grow your footprint calendar.</p>
+                                </div>
+                                <div class="arcade-icon calendar-arc">⚡</div>
+                            </div>
+                            <div class="arcade-game-body">
+                                <div class="arcade-timer-box">
+                                    <span class="countdown-timer" id="boost-status-display" style="font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: bold; color: var(--color-cyan);">Ready to Boost</span>
+                                    <span class="reward-amount">+100 XP • Gas ~ $0.006 - $0.01</span>
+                                </div>
+                                <button class="btn btn-primary btn-block" id="btn-boost-activity-action">⚡ Boost Activity</button>
+                            </div>
+                        </div>
+
+                        <!-- Game 2: Dice Roll -->
+                        <div class="card glass-card arcade-game-card">
+                            <div class="arcade-game-header">
+                                <div>
+                                    <span class="game-tag tag-dice">Chance Game</span>
+                                    <h3>Daily Dice Roll</h3>
+                                    <p>Roll the 3D dice to win high-yield BXP bonuses.</p>
+                                </div>
+                                <div class="arcade-icon dice-cube-icon">
+                                    <div class="dice-model visual-dice-element">
+                                        <div class="dice-face face-1">1</div>
+                                        <div class="dice-face face-2">2</div>
+                                        <div class="dice-face face-3">3</div>
+                                        <div class="dice-face face-4">4</div>
+                                        <div class="dice-face face-5">5</div>
+                                        <div class="dice-face face-6">6</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="arcade-game-body">
+                                <div class="arcade-rolls-box">
+                                    <span class="rolls-count-display" style="font-size: 18px; font-weight: bold; color: var(--color-cyan);">3 / 3</span>
+                                    <span class="reward-amount">+30 - 50 BXP • Rolls Remaining Today</span>
+                                </div>
+                                <button class="btn btn-primary-alt btn-block btn-roll-dice-action">🎲 Roll Dice</button>
+                            </div>
+                        </div>
+
+                        <!-- Game 3: Mystery Box -->
+                        <div class="card glass-card arcade-game-card">
+                            <div class="arcade-game-header">
+                                <div>
+                                    <span class="game-tag tag-mystery">Loot Box</span>
+                                    <h3>Mystery Box</h3>
+                                    <p>Open mystery boxes containing global XP boosts.</p>
+                                </div>
+                                <div class="arcade-icon mystery-box-visual visual-box-element" style="background: none !important; border: none !important;">
+                                    <svg viewBox="0 0 64 64" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg" class="mystery-box-svg" style="overflow: visible;">
+                                        <defs>
+                                            <radialGradient id="box-glow" cx="50%" cy="50%" r="50%">
+                                                <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.6"/>
+                                                <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+                                            </radialGradient>
+                                            <linearGradient id="body-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#8B5CF6"/>
+                                                <stop offset="100%" stop-color="#4C1D95"/>
+                                            </linearGradient>
+                                            <linearGradient id="lid-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#A78BFA"/>
+                                                <stop offset="100%" stop-color="#6D28D9"/>
+                                            </linearGradient>
+                                            <linearGradient id="ribbon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#FBBF24"/>
+                                                <stop offset="100%" stop-color="#D97706"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <circle cx="32" cy="36" r="24" fill="url(#box-glow)"/>
+                                        
+                                        <!-- Box Body Group -->
+                                        <g class="box-body-group">
+                                            <!-- Body Base -->
+                                            <rect class="box-body-svg" x="16" y="26" width="32" height="22" rx="4" fill="url(#body-grad)" stroke="#C084FC" stroke-width="1.5"/>
+                                            <!-- Body Vertical Ribbon -->
+                                            <rect x="29" y="26" width="6" height="22" fill="url(#ribbon-grad)"/>
+                                            <!-- Body Horizontal Ribbon -->
+                                            <rect x="16" y="34" width="32" height="6" fill="url(#ribbon-grad)"/>
+                                            <!-- Center Golden Crest with Question Mark -->
+                                            <circle cx="32" cy="37" r="7" fill="url(#ribbon-grad)" stroke="#FBBF24" stroke-width="1.2"/>
+                                            <text x="32" y="37" font-family="'Outfit', 'Inter', sans-serif" font-size="9px" font-weight="900" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">?</text>
+                                        </g>
+                                        
+                                        <!-- Box Lid Group (animates together) -->
+                                        <g class="box-lid-svg">
+                                            <!-- Lid Base -->
+                                            <rect x="13" y="16" width="38" height="10" rx="3" fill="url(#lid-grad)" stroke="#D8B4FE" stroke-width="1.5"/>
+                                            <!-- Lid Vertical Ribbon -->
+                                            <rect x="29" y="16" width="6" height="10" fill="url(#ribbon-grad)"/>
+                                            <!-- Ribbon Bow Loops -->
+                                            <path d="M 32 16 C 24 8, 26 4, 32 16 Z" fill="url(#ribbon-grad)" stroke="#FBBF24" stroke-width="0.5"/>
+                                            <path d="M 32 16 C 40 8, 38 4, 32 16 Z" fill="url(#ribbon-grad)" stroke="#FBBF24" stroke-width="0.5"/>
+                                            <!-- Ribbon Bow Knot -->
+                                            <circle cx="32" cy="16" r="3" fill="#FBBF24"/>
+                                        </g>
+                                        
+                                        <!-- Sparkling effects -->
+                                        <path d="M10 14l1.5 2.5L14 17l-2.5 1.5L10 21l-1.5-2.5L6 17l2.5-1.5z" fill="#00F0FF" opacity="0.8">
+                                            <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                                        </path>
+                                        <path d="M52 48l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#FBBF24" opacity="0.8">
+                                            <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
+                                        </path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="arcade-game-body">
+                                <div class="arcade-boxes-box">
+                                    <span class="box-count-display" style="font-size: 18px; font-weight: bold; color: var(--color-purple);">3 / 3</span>
+                                    <span class="reward-amount">+30 - 50 BXP • Boxes Remaining Today</span>
+                                </div>
+                                <button class="btn btn-purple btn-block btn-open-box-action">🎁 Open Box</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Games Referral Multiplier Promo Banner -->
+                    <div class="referral-promo-banner glow-cyan">
+                        <div class="promo-banner-left">
+                            <span class="promo-banner-dice">🎲</span>
+                            <div class="promo-banner-text">
+                                <h4>Want More Daily Game Rolls?</h4>
+                                <p>Invite friends! For every citizen checking their score, you get **+1 Daily Roll** and **30% commission** on all BXP they collect!</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" id="btn-promo-go-ref">Get Invite Link</button>
+                    </div>
+                </div>
+            </main>
+            
+            <main class="dashboard-content tab-content hidden" id="tab-rewards">
+                <div class="rewards-tab-container">
+                    <div class="section-header-row">
+                        <div class="title-group">
+                            <h2>💰 BXP Rewards & Claims</h2>
+                            <p>Redeem your Base Experience Points (BXP) for XP boosts and NFT items.</p>
+                        </div>
+                        <button class="btn btn-outline btn-back-home">Back to Dashboard</button>
+                    </div>
+
+                    <div class="rewards-summary-grid" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px;">
+                        <div class="card glass-card reward-balance-card">
+                            <div class="card-body">
+                                <span class="score-label">AVAILABLE REWARDS BALANCE</span>
+                                <div class="score-main-row" style="margin-bottom: 8px;">
+                                    <h1 class="score-big" id="rewards-bxp-amount" style="font-size: 44px;">28,440</h1>
+                                    <span class="score-denom" style="margin-left: 6px;">BXP</span>
+                                </div>
+                                <div class="gas-notice" style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--border-radius-sm); padding: 10px; margin-top: 14px;">
+                                    <span style="font-size: 11px; color: var(--color-green); font-weight: 600; display: block;">⚡ Base Gas Speed</span>
+                                    <p style="font-size: 10px; color: var(--text-secondary); margin-top: 2px; line-height: 1.3;">Every claim transaction on Base is fully optimized for near-zero gas costs!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card glass-card rewards-catalog-card">
+                            <div class="card-header-simple">
+                                <h3>Redeem BXP Items</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="catalog-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div class="catalog-item" style="background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); border-radius: var(--border-radius-md); padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                                        <div>
+                                            <span style="font-size: 9px; background: rgba(0, 82, 255, 0.15); color: var(--color-cyan); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;">XP BOOST</span>
+                                            <h4 style="margin-top: 8px; font-size: 13px;">500 XP Boost</h4>
+                                            <p style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">Convert BXP to level up your global XP rating.</p>
+                                        </div>
+                                        <div style="margin-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                                            <strong style="font-size: 12px; color: var(--color-gold);">5,000 BXP</strong>
+                                            <button class="btn btn-primary btn-sm btn-claim-reward" data-item="xp-boost" data-cost="5000">Redeem</button>
+                                        </div>
+                                    </div>
+                                    <div class="catalog-item" style="background: rgba(0,0,0,0.2); border: 1px solid var(--card-border); border-radius: var(--border-radius-md); padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                                        <div>
+                                            <span style="font-size: 9px; background: rgba(139, 92, 246, 0.15); color: #A78BFA; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;">NFT BADGE</span>
+                                            <h4 style="margin-top: 8px; font-size: 13px;">Base OG Commemorative</h4>
+                                            <p style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">Exclusive collection for wallet age 1yr+.</p>
+                                        </div>
+                                        <div style="margin-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                                            <strong style="font-size: 12px; color: var(--color-gold);">10,000 BXP</strong>
+                                            <button class="btn btn-purple btn-sm btn-claim-reward" data-item="og-nft" data-cost="10000">Redeem</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card glass-card tx-history-card" style="margin-top: 24px;">
+                        <div class="card-header">
+                            <h3>BXP Collected Transactions & Claims Log</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="eligibility-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Amount</th>
+                                            <th>Gas Speed</th>
+                                            <th>Status</th>
+                                            <th>Transaction Hash / Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bxp-tx-history-tbody">
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <main class="dashboard-content tab-content hidden" id="tab-leaderboard">
+                <div class="leaderboard-tab-container">
+                    <div class="section-header-row">
+                        <div class="title-group">
+                            <h2>🏆 Global Reputation Leaderboard</h2>
+                            <p>Wallet rankings by Base Reputation Score and total BXP earned.</p>
+                        </div>
+                        <button class="btn btn-outline btn-back-home">Back to Dashboard</button>
+                    </div>
+
+                    <div class="card glass-card full-leaderboard-card">
+                        <div class="card-header">
+                            <h3>Top Base Contributor Rankings</h3>
+                            <div class="leaderboard-filters" style="display: flex; gap: 8px;">
+                                <button class="btn btn-toggle active">Global</button>
+                                <button class="btn btn-toggle">Weekly</button>
+                                <button class="btn btn-toggle">Friends</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="eligibility-table" style="text-align: left; width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>User / Wallet Address</th>
+                                            <th style="text-align: center;">Reputation Score</th>
+                                            <th style="text-align: right;">Total BXP Earned</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="full-leaderboard-tbody">
+                                        <!-- Generated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <main class="dashboard-content tab-content hidden" id="tab-referrals">
+                <div class="referrals-tab-container">
+                    <div class="section-header-row">
+                        <div class="title-group">
+                            <h2>👥 Referral Hub & Earnings</h2>
+                            <p>Invite friends to check their reputation on Base, and get rewarded in real-time.</p>
+                        </div>
+                        <button class="btn btn-outline btn-back-home">Back to Dashboard</button>
+                    </div>
+
+                    <div class="rewards-summary-grid" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px;">
+                        <div class="card glass-card referral-banners-card">
+                            <div class="card-body" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                                <div>
+                                    <span style="font-size: 11px; color: var(--color-cyan); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">REFERRAL COMMISSIONS</span>
+                                    <h3 style="font-size: 20px; margin-top: 8px;">Earn 30% Commission + 50 BXP Flat</h3>
+                                    <p style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; line-height: 1.5;">You earn <strong>30%</strong> of all BXP earned by your referred users from daily tasks, plus a flat reward of <strong>50 BXP</strong> immediately when they check their wallet age.</p>
+                                </div>
+                                <div class="referral-input-wrapper" style="margin-top: 20px; display: flex; background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); border-radius: var(--border-radius-sm); padding: 2px;">
+                                    <input type="text" value="pandus.app/r/onchain_kid" id="referral-page-link" readonly style="background: none; border: none; color: var(--text-primary); font-size: 12px; flex-grow: 1; padding: 10px; width: 100%;">
+                                    <button class="btn btn-copy" id="btn-copy-ref-page">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card glass-card referral-metrics-card">
+                            <div class="card-header-simple">
+                                <h3>Invited User Stats</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="footprint-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div class="f-stat-card" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-md); padding: 16px;">
+                                        <span class="f-stat-val text-blue" id="ref-page-invited" style="font-size: 20px; font-weight: 700; display: block;">15 friends</span>
+                                        <span class="f-stat-lbl" style="font-size: 9px; color: var(--text-secondary); text-transform: uppercase;">Total Invited Users</span>
+                                    </div>
+                                    <div class="f-stat-card" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-md); padding: 16px;">
+                                        <span class="f-stat-val text-green" id="ref-page-bxp-earned" style="font-size: 20px; font-weight: 700; display: block;">8,500 BXP</span>
+                                        <span class="f-stat-lbl" style="font-size: 9px; color: var(--text-secondary); text-transform: uppercase;">BXP Commission</span>
+                                    </div>
+                                    <div class="f-stat-card" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-md); padding: 16px;">
+                                        <span class="f-stat-val text-purple" id="ref-page-percentage" style="font-size: 20px; font-weight: 700; display: block;">30% Tier</span>
+                                        <span class="f-stat-lbl" style="font-size: 9px; color: var(--text-secondary); text-transform: uppercase;">Commission Rate</span>
+                                    </div>
+                                    <div class="f-stat-card" style="background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: var(--border-radius-md); padding: 16px;">
+                                        <span class="f-stat-val text-gold" id="ref-page-bonus-rolls" style="font-size: 20px; font-weight: 700; display: block;">+15 rolls</span>
+                                        <span class="f-stat-lbl" style="font-size: 9px; color: var(--text-secondary); text-transform: uppercase;">Bonus Rolls</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card glass-card referred-users-card" style="margin-top: 24px;">
+                        <div class="card-header">
+                            <h3>Referred User List & Commision Share</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="eligibility-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Wallet Address</th>
+                                            <th>Join Date</th>
+                                            <th>Their Earnings (BXP)</th>
+                                            <th>Your Commission Share (30%)</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="referred-users-tbody">
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <main class="dashboard-content tab-content hidden" id="tab-badges">
+                <div class="badges-tab-container">
+                    <div class="section-header-row">
+                        <div class="title-group">
+                            <h2>🎖 Badges & Achievements</h2>
+                            <p>Browse on-chain credentials unlocked by your transactions, contract calls, volume, and social mentions.</p>
+                        </div>
+                        <button class="btn btn-outline btn-back-home">Back to Dashboard</button>
+                    </div>
+
+                    <div class="badges-categories-grid" style="display: flex; flex-direction: column; gap: 24px;">
+                        <!-- Category 1: Transactions -->
+                        <div class="card glass-card">
+                            <div class="card-header"><h3>🔄 Transaction Badges</h3></div>
+                            <div class="card-body">
+                                <div class="badges-arcade-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;" id="badges-tx-grid">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category 2: Smart Contracts -->
+                        <div class="card glass-card">
+                            <div class="card-header"><h3>🧠 Smart Contract Badges</h3></div>
+                            <div class="card-body">
+                                <div class="badges-arcade-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;" id="badges-contract-grid">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category 3: Volume -->
+                        <div class="card glass-card">
+                            <div class="card-header"><h3>💰 Volume Badges</h3></div>
+                            <div class="card-body">
+                                <div class="badges-arcade-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;" id="badges-volume-grid">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category 4: Twitter Base Mentions -->
+                        <div class="card glass-card">
+                            <div class="card-header"><h3>📣 Twitter Base Mentions Badges</h3></div>
+                            <div class="card-body">
+                                <div class="badges-arcade-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;" id="badges-mentions-grid">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <main class="dashboard-content tab-content hidden" id="tab-transactions">
+                <div class="transactions-tab-container">
+                    <div class="section-header-row">
+                        <div class="title-group">
+                            <h2>💳 Base Transaction History</h2>
+                            <p>Live transaction list audited from Basescan. Direct RPC/Explorer ledger.</p>
+                        </div>
+                        <button class="btn btn-outline btn-back-home">Back to Dashboard</button>
+                    </div>
+
+                    <div class="card glass-card">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3>Basescan Transaction Records</h3>
+                            <a href="#" id="view-on-basescan-tab-btn" target="_blank" class="card-link" style="color: var(--color-cyan); text-decoration: none; font-size: 13px; font-weight: 500;">🌐 View full explorer page</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="eligibility-table" style="text-align: left; width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>Tx Hash</th>
+                                            <th>Block</th>
+                                            <th>Time</th>
+                                            <th>From / To</th>
+                                            <th style="text-align: right;">Value</th>
+                                            <th style="text-align: right;">Gas Fee (ETH)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="real-transactions-tbody">
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                                                No transactions found or profile not loaded.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+
+
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Web3 Mint Passport Modal -->
+    <div class="web3-modal-overlay hidden" id="mint-passport-modal">
+        <div class="web3-modal-card">
+            <div class="modal-header-row">
+                <h3>MINT BASE CITIZEN PASSPORT</h3>
+                <button class="btn-close-modal" id="btn-close-mint-modal" onclick="document.getElementById('mint-passport-modal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body-content">
+                <div class="modal-illustration-saturn">🪐</div>
+                <h4>Complete Permanent Onchain Minting</h4>
+                <p>Minting permanently records your reputation score on the Base blockchain. Download and subsequent sharing will be free forever.</p>
+                
+                <div class="mint-price-detail">
+                    <span>Mint Price:</span>
+                    <strong>$0.01 <span style="font-size: 11px; color: var(--text-secondary);">(0.000003 ETH)</span></strong>
+                </div>
+                
+                <button class="btn btn-primary btn-block" id="btn-confirm-mint-pay" style="padding: 12px; font-size: 13px;">Confirm Payment ($0.01)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outstanding Score Celebration Modal -->
+    <div class="web3-modal-overlay hidden" id="celebration-share-modal">
+        <div class="web3-modal-card celebration-card">
+            <div class="modal-header-row">
+                <h3>👑 OUTSTANDING BASE CITIZEN UNLOCKED</h3>
+                <button class="btn-close-modal" id="btn-close-celebration-modal" onclick="document.getElementById('celebration-share-modal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body-content">
+                <div class="modal-celebration-ring">
+                    <span class="celebration-emoji">🏆</span>
+                    <div class="celebration-score-bubble" id="celebration-score-bubble-val">94</div>
+                </div>
+                <h4>Top 3% Base Citizen Reputation</h4>
+                <p>Congratulations! Your wallet reputation score is Outstanding. Share your verified Base Passport on X to receive an instant **+100 BXP Boost** and show off your organic status!</p>
+                
+                <div class="celebration-actions-vertical">
+                    <button class="btn btn-x-viral btn-block" id="btn-celebration-tweet" style="padding: 14px; font-size: 13px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="margin-right: 6px; vertical-align: middle;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        Share Score on X (+100 BXP)
+                    </button>
+                    <button class="btn btn-outline btn-block" id="btn-celebration-save-png" style="padding: 12px; font-size: 12px; margin-top: 10px;">
+                        💾 Save HD Passport PNG
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- X Mentions Scanner Modal -->
+    <div class="web3-modal-overlay hidden" id="x-scanner-modal">
+        <div class="web3-modal-card x-scanner-card" style="border-color: var(--color-cyan); box-shadow: 0 0 30px var(--color-cyan-glow);">
+            <div class="modal-header-row">
+                <h3>X MENTIONS REAL-TIME SCANNER</h3>
+                <button class="btn-close-modal" id="btn-close-scanner-modal" onclick="document.getElementById('x-scanner-modal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body-content">
+                <div class="scanner-radar-wrapper" style="position: relative; width: 80px; height: 80px; margin: 0 auto; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%); border: 1.5px dashed rgba(0, 240, 255, 0.2); border-radius: 50%;">
+                    <span class="scanner-radar-icon" style="font-size: 28px;">🔍</span>
+                    <div class="scanner-radar-sweep" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 2px solid transparent; border-top-color: var(--color-cyan); border-radius: 50%; animation: rotate-dashed 1.5s linear infinite;"></div>
+                    <div class="scanner-percentage-display" id="scanner-progress-val" style="position: absolute; bottom: -24px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; color: var(--color-cyan);">0%</div>
+                </div>
+                <h4 style="margin-top: 32px; font-size: 14px;">Scanning X Timeline for Base Mentions</h4>
+                <p style="margin-bottom: 16px; font-size: 11px; color: var(--text-secondary);" id="scanner-status-text">Initializing API connection...</p>
+                <div class="scanner-progress-container" style="background: rgba(255,255,255,0.05); border-radius: 10px; height: 6px; overflow: hidden; width: 100%;">
+                    <div class="scanner-progress-fill" id="scanner-progress-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--color-blue), var(--color-cyan)); border-radius: 10px; transition: width 0.15s ease;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Base Mentions Report Modal -->
+    <div class="web3-modal-overlay hidden" id="x-report-modal">
+        <div class="web3-modal-card x-report-card" style="width: 420px; border-color: var(--color-cyan); box-shadow: 0 0 40px rgba(0, 240, 255, 0.25);">
+            <div class="modal-header-row" style="margin-bottom: 12px;">
+                <h3>📜 BASE MENTIONS ON-CHAIN REPORT</h3>
+                <button class="btn-close-modal" id="btn-close-report-modal" onclick="document.getElementById('x-report-modal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body-content" style="text-align: left;">
+                <div class="scanned-user-header" style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 14px;">
+                    <div class="scanned-avatar" style="font-size: 24px; background: rgba(0,240,255,0.1); border: 1px solid rgba(0,240,255,0.3); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">🐦</div>
+                    <div>
+                        <strong style="font-size: 13px; color: #ffffff;" id="report-display-name">Base Citizen</strong>
+                        <span style="display: block; font-size: 10px; color: var(--color-cyan);" id="report-handle">@handle</span>
+                    </div>
+                </div>
+
+                <div class="report-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+                    <div class="report-stat-box" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; text-align: center;">
+                        <span style="font-size: 8px; color: var(--text-secondary); text-transform: uppercase; display: block; margin-bottom: 4px;">Mentions Found (@base / #base)</span>
+                        <strong style="font-size: 20px; color: var(--color-cyan);" id="report-mentions-count">0</strong>
+                    </div>
+                    <div class="report-stat-box" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; text-align: center;">
+                        <span style="font-size: 8px; color: var(--text-secondary); text-transform: uppercase; display: block; margin-bottom: 4px;">NLP Sentiment</span>
+                        <strong style="font-size: 20px; color: var(--color-green);" id="report-sentiment">96% Bullish</strong>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Detected Mentions Timeline</h4>
+                <div class="scanned-tweets-list" id="report-tweets-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 150px; overflow-y: auto; padding-right: 4px;">
+                    <!-- Loaded dynamically -->
+                </div>
+
+                <div class="rewards-claim-box" style="background: linear-gradient(135deg, rgba(0, 82, 255, 0.15), rgba(0, 240, 255, 0.05)); border: 1.5px dashed rgba(0, 240, 255, 0.3); border-radius: 8px; padding: 14px; text-align: center; margin-bottom: 16px;">
+                    <span style="font-size: 9px; font-weight: 700; color: var(--color-cyan); letter-spacing: 1px; text-transform: uppercase; display: block;">PROMOTER REWARD SUMMARY</span>
+                    <strong style="font-size: 22px; color: var(--color-gold); display: block; margin-top: 6px;" id="report-rewards-display">+0 BXP</strong>
+                    <span style="font-size: 9px; color: var(--text-secondary); display: block; margin-top: 2px;">+10 Reputation Score Impact Included</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn btn-primary btn-block" id="btn-claim-mentions-rewards" style="padding: 12px; font-size: 13px;">Claim Reward BXP</button>
+                    <button class="btn btn-outline btn-block" id="btn-close-mentions-report" style="padding: 10px; font-size: 11px;">Close Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Web3 Claim Badge Modal -->
+    <div class="web3-modal-overlay hidden" id="claim-badge-modal">
+        <div class="web3-modal-card">
+            <div class="modal-header-row">
+                <h3 id="claim-badge-title">CLAIM REPUTATION BADGE</h3>
+                <button class="btn-close-modal" id="btn-close-badge-modal" onclick="document.getElementById('claim-badge-modal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body-content">
+                <div class="modal-illustration-saturn" id="claim-badge-icon" style="font-size: 48px; margin-bottom: 16px;">🎖</div>
+                <h4 id="claim-badge-name">Badge Name</h4>
+                <p id="claim-badge-desc">Badge Description</p>
+                
+                <div class="mint-price-detail">
+                    <span>Smart Contract Support Fee:</span>
+                    <strong>$0.005 <span style="font-size: 11px; color: var(--text-secondary);">(0.0000015 ETH)</span></strong>
+                </div>
+                
+                <button class="btn btn-primary btn-block" id="btn-confirm-badge-claim" style="padding: 12px; font-size: 13px;">Confirm Claim ($0.005)</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Connect Wallet Modal -->
+    <div class="web3-modal-overlay hidden" id="connect-wallet-modal" onclick="if(event.target === this) this.classList.add('hidden')">
+        <div class="web3-modal-card" style="width: 400px; border-color: var(--color-blue); box-shadow: 0 0 60px rgba(0, 82, 255, 0.3);">
+            <div class="modal-header-row" style="margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #0052FF, #00F0FF); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px;">🔵</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 15px; letter-spacing: 0.5px;">CONNECT TO BASE PASSPORT</h3>
+                        <p style="margin: 0; font-size: 10px; color: var(--text-muted);">Read-only access • No signing required</p>
+                    </div>
+                </div>
+                <button class="btn-close-modal" id="btn-close-connect-modal" onclick="document.getElementById('connect-wallet-modal').classList.add('hidden')">&#x2715;</button>
+            </div>
+            <div class="modal-body-content">
+                <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">Connect your wallet to view your Base onchain reputation score, airdrop eligibility, and passport stats.</p>
+                
+                <!-- Wallet Provider Buttons -->
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+                    <!-- Base Wallet (Coinbase) -->
+                    <button class="wallet-connect-provider-btn" id="cwm-base" data-wallet="base" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; width: 100%; text-align: left;">
+                        <img src="https://raw.githubusercontent.com/rainbow-me/rainbowkit/main/packages/rainbowkit/src/wallets/walletConnectors/coinbaseWallet/coinbaseWallet.svg" alt="Base Wallet" style="width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; font-weight: 600; color: #fff; font-family: 'Outfit', sans-serif;">Coinbase Wallet</div>
+                            <div style="font-size: 10px; color: var(--text-muted);">Coinbase Smart Wallet (Base)</div>
+                        </div>
+                        <span style="font-size: 9px; color: var(--color-blue); font-weight: 600; background: rgba(0,82,255,0.15); padding: 3px 8px; border-radius: 4px;">Recommended</span>
+                    </button>
+                    <!-- MetaMask -->
+                    <button class="wallet-connect-provider-btn" id="cwm-metamask" data-wallet="metamask" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; width: 100%; text-align: left;">
+                        <img src="https://raw.githubusercontent.com/rainbow-me/rainbowkit/main/packages/rainbowkit/src/wallets/walletConnectors/metaMaskWallet/metaMaskWallet.svg" alt="MetaMask" style="width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; font-weight: 600; color: #fff; font-family: 'Outfit', sans-serif;">MetaMask</div>
+                            <div style="font-size: 10px; color: var(--text-muted);">Browser Extension / Mobile App</div>
+                        </div>
+                        <span style="font-size: 9px; color: var(--color-cyan); font-weight: 600; background: rgba(0,240,255,0.1); padding: 3px 8px; border-radius: 4px;">Popular</span>
+                    </button>
+                    <!-- OKX Wallet -->
+                    <button class="wallet-connect-provider-btn" id="cwm-okx" data-wallet="okx" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; width: 100%; text-align: left;">
+                        <img src="https://raw.githubusercontent.com/rainbow-me/rainbowkit/main/packages/rainbowkit/src/wallets/walletConnectors/okxWallet/okxWallet.svg" alt="OKX Wallet" style="width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; font-weight: 600; color: #fff; font-family: 'Outfit', sans-serif;">OKX Wallet</div>
+                            <div style="font-size: 10px; color: var(--text-muted);">Web3 Wallet by OKX</div>
+                        </div>
+                    </button>
+                    <!-- Rabby Wallet -->
+                    <button class="wallet-connect-provider-btn" id="cwm-rabby" data-wallet="rabby" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; width: 100%; text-align: left;">
+                        <img src="https://raw.githubusercontent.com/rainbow-me/rainbowkit/main/packages/rainbowkit/src/wallets/walletConnectors/rabbyWallet/rabbyWallet.svg" alt="Rabby Wallet" style="width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; font-weight: 600; color: #fff; font-family: 'Outfit', sans-serif;">Rabby Wallet</div>
+                            <div style="font-size: 10px; color: var(--text-muted);">Pro Ethereum/EVM Wallet</div>
+                        </div>
+                    </button>
+                    <!-- WalletConnect -->
+                    <button class="wallet-connect-provider-btn" id="cwm-walletconnect" data-wallet="walletconnect" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; width: 100%; text-align: left;">
+                        <img src="https://raw.githubusercontent.com/rainbow-me/rainbowkit/main/packages/rainbowkit/src/wallets/walletConnectors/walletConnectWallet/walletConnectWallet.svg" alt="WalletConnect" style="width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; font-weight: 600; color: #fff; font-family: 'Outfit', sans-serif;">WalletConnect</div>
+                            <div style="font-size: 10px; color: var(--text-muted);">Rainbow, Safe, Trust, & others via QR</div>
+                        </div>
+                    </button>
+                    <!-- Farcaster -->
+                    <button class="wallet-connect-provider-btn" id="cwm-farcaster" data-wallet="farcaster" style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; width: 100%; text-align: left;">
+                        <img src="https://raw.githubusercontent.com/farcasterxyz/brand/main/logo/icon.svg" alt="Farcaster" style="width: 28px; height: 28px; object-fit: contain; flex-shrink: 0;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; font-weight: 600; color: #fff; font-family: 'Outfit', sans-serif;">Farcaster (Warpcast)</div>
+                            <div style="font-size: 10px; color: var(--text-muted);">Social Wallet via Warpcast</div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Or check by address -->
+                <div style="position: relative; text-align: center; margin-bottom: 14px;">
+                    <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.05); margin: 0;">
+                    <span style="position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--bg-card); padding: 0 10px; font-size: 10px; color: var(--text-muted);">OR</span>
+                </div>
+                <input type="text" id="cwm-address-input" placeholder="Paste wallet address 0x... or ENS name" style="width: 100%; box-sizing: border-box; padding: 12px 14px; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 10px; color: #fff; font-size: 12px; font-family: 'Inter', sans-serif; outline: none; margin-bottom: 10px; transition: border-color 0.2s ease;">
+                <button id="cwm-check-address-btn" class="btn btn-outline btn-block" style="padding: 11px; font-size: 12px;">Check Address / ENS</button>
+
+                <p style="margin-top: 14px; font-size: 9px; color: var(--text-muted); text-align: center; line-height: 1.5;">
+                    🔒 Read-only mode — we never request signatures or access to funds. Your data stays on-device.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div class="web3-modal-overlay hidden" id="support-modal" onclick="if(event.target === this) this.classList.add('hidden')">
+        <div class="web3-modal-card glass-card" style="max-width: 450px;">
+            <div class="web3-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 15px; letter-spacing: 0.5px;">CONTACT SUPPORT</h3>
+                <button class="btn-close-modal" id="btn-close-support-modal" style="background: none; border: none; color: var(--text-secondary); font-size: 20px; cursor: pointer;" onclick="document.getElementById('support-modal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="web3-modal-body">
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; text-align: center;">Choose your preferred platform and support contact to connect with our team:</p>
+                
+                <div class="support-channels" style="display: flex; flex-direction: column; gap: 16px;">
+                    <!-- Telegram Support Section -->
+                    <div class="support-section" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 14px;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 12px; color: var(--color-cyan); display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 16px;">💬</span> Telegram Support
+                        </h4>
+                        <div style="display: flex; gap: 10px; width: 100%;">
+                            <a href="https://t.me/lingaamain" target="_blank" class="btn btn-outline" style="flex: 1; font-size: 11px; padding: 10px; text-align: center; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-block;">@lingaamain</a>
+                            <a href="https://t.me/muthucrazyboy" target="_blank" class="btn btn-outline" style="flex: 1; font-size: 11px; padding: 10px; text-align: center; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-block;">@muthucrazyboy</a>
+                        </div>
+                    </div>
+
+                    <!-- X Support Section -->
+                    <div class="support-section" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 14px;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 12px; color: var(--color-purple); display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 16px;">🐦</span> X (Twitter) Support
+                        </h4>
+                        <div style="display: flex; gap: 10px; width: 100%;">
+                            <a href="https://x.com/lingaamain" target="_blank" class="btn btn-outline" style="flex: 1; font-size: 11px; padding: 10px; text-align: center; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-block;">@lingaamain</a>
+                            <a href="https://x.com/muthucrazyboy" target="_blank" class="btn btn-outline" style="flex: 1; font-size: 11px; padding: 10px; text-align: center; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-block;">@muthucrazyboy</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="wallet-connect.bundle.js?v=18"></script>
+    <script src="index.js?v=21"></script>
+</body>
+</html>

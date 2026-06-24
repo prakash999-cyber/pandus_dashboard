@@ -1,0 +1,66 @@
+1645: document.querySelectorAll(".btn-checkin-action").forEach(btn => {
+1647: btn.innerText = "Check-in";
+1661: document.querySelectorAll(".btn-checkin-action").forEach(btn => {
+1663: btn.innerText = "Checked In";
+3158: const rollBtns = document.querySelectorAll(".btn-roll-dice-action");
+3162: btn.innerText = "🎲 Roll Dice";
+3180: const checkinBtns = document.querySelectorAll(".btn-checkin-action");
+3181: checkinBtns.forEach(btn => {
+3265: collectNftXpBtn.innerText = "Claiming...";
+3273: collectNftXpBtn.innerText = "✅ Bonus Claimed";
+3430: const checkInBtns = document.querySelectorAll(".btn-checkin-action");
+3431: checkInBtns.forEach(btn => {
+3433: btn.innerText = "Checking In...";
+3539: boostBtn.innerText = "⚡ Boost Claimed";
+3565: const rollBtns = document.querySelectorAll(".btn-roll-dice-action");
+3630: btn.innerText = "🎲 Roll Dice";
+3641: btn.innerText = "🎲 Roll Dice";
+3652: btn.innerText = "🎲 Roll Dice";
+4102: const claimBtn = document.getElementById("btn-claim-mentions-rewards");
+4106: claimBtn.disabled = true;
+4107: claimBtn.innerText = "Already Verified & Claimed ✓";
+4108: claimBtn.style.opacity = "0.6";
+4109: claimBtn.style.cursor = "not-allowed";
+4117: claimBtn.disabled = false;
+4118: claimBtn.innerText = "Claim Reward XP (One-time Fee)";
+4119: claimBtn.style.opacity = "1";
+4120: claimBtn.style.cursor = "pointer";
+4122: claimBtn.onclick = async () => {
+4130: claimBtn.disabled = true;
+4131: claimBtn.innerText = "Verifying...";
+4163: claimBtn.disabled = false;
+4164: claimBtn.innerText = "Claim Reward XP (One-time Fee)";
+4167: claimBtn.disabled = false;
+4168: claimBtn.innerText = "Claim Reward XP (One-time Fee)";
+4179: document.querySelectorAll(".btn-checkin-action").forEach(btn => {
+4180: btn.addEventListener("click", handleCheckIn);
+4183: document.querySelectorAll(".btn-roll-dice-action").forEach(btn => {
+4184: btn.addEventListener("click", handleDiceRoll);
+4275: if (e.target && e.target.classList.contains("btn-claim-reward")) {
+4307: const cwmCheckAddressBtn = document.getElementById("cwm-check-address-btn");
+4362: if (cwmCheckAddressBtn && cwmAddressInput) {
+4363: cwmCheckAddressBtn.addEventListener("click", async () => {
+4369: cwmCheckAddressBtn.innerText = "Looking up...";
+4370: cwmCheckAddressBtn.disabled = true;
+4385: cwmCheckAddressBtn.innerText = "Check Address / ENS";
+4386: cwmCheckAddressBtn.disabled = false;
+4405: if (e.key === "Enter") cwmCheckAddressBtn.click();
+4877: const closeMintModalBtn = document.getElementById("btn-close-mint-modal");
+4878: const confirmMintBtn = document.getElementById("btn-confirm-mint-pay");
+4880: if (closeMintModalBtn && mintModal) {
+4881: closeMintModalBtn.addEventListener("click", () => {
+4886: if (confirmMintBtn && mintModal) {
+4887: confirmMintBtn.addEventListener("click", async () => {
+4888: confirmMintBtn.disabled = true;
+4889: confirmMintBtn.innerText = "Processing Mint...";
+4921: confirmMintBtn.disabled = false;
+4922: confirmMintBtn.innerText = "Confirm Payment ($0.01)";
+4966: const confirmBadgeClaimBtn = document.getElementById("btn-confirm-badge-claim");
+4967: if (confirmBadgeClaimBtn && badgeModal) {
+4968: confirmBadgeClaimBtn.addEventListener("click", async () => {
+4980: confirmBadgeClaimBtn.disabled = true;
+4981: confirmBadgeClaimBtn.innerText = "Claiming...";
+5013: confirmBadgeClaimBtn.disabled = false;
+5014: confirmBadgeClaimBtn.innerText = "Confirm Claim ($0.005)";
+5046: document.querySelectorAll(".btn-roll-dice-action").forEach(btn => {
+5063: boostBtn.innerText = "⚡ Boost Claimed";

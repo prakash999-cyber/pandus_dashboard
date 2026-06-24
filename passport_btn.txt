@@ -1,0 +1,3 @@
+2346: const btnSavePassport = document.getElementById("btn-save-passport-new");
+4176: const saveBtn = document.getElementById("btn-save-passport-new");
+4835: const saveBtn = document.getElementById("btn-save-passport-new");
