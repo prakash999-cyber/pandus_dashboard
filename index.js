@@ -728,13 +728,24 @@ function getOrCreateProfileForAddress(address) {
     const name = `anon_${cleanAddress.substring(2, 6)}`;
     const shortAddress = cleanAddress.substring(0, 6) + "..." + cleanAddress.substring(38, 42);
     
+    // Award referral signup bonus if joined via a referral link
+    const referrer = localStorage.getItem("PANDUS_REFERRER");
+    let initialBxp = 0;
+    if (referrer) {
+        initialBxp = 100; // 100 BXP referral signup bonus
+        localStorage.removeItem("PANDUS_REFERRER");
+        setTimeout(() => {
+            showToast(`🎉 Welcome to Pandus! You received +100 BXP for joining via referral from ${referrer}!`, "success");
+        }, 1200);
+    }
+
     // Start with empty/zero placeholder data — fetchOnchainDetails will fill in the real values
     const newProfile = {
         name: name,
         address: cleanAddress,
         shortAddress: shortAddress,
         airdropScore: 0,
-        bxp: 0,
+        bxp: initialBxp,
         xp: 0,
         mentions: 0,
         sybil: "?",
@@ -1087,7 +1098,7 @@ async function fetchOnchainDetails(profileKey) {
                 if (DOM.sidebarUsername) DOM.sidebarUsername.innerText = user.name;
                 const passportName = document.getElementById("passport-name");
                 if (passportName) passportName.innerText = user.name;
-                if (DOM.referralLinkInput) DOM.referralLinkInput.value = `pandus.app/r/${user.name}`;
+                if (DOM.referralLinkInput) DOM.referralLinkInput.value = `${window.location.origin}/r/${user.name}`;
                 renderPassport(user);
             }
         } catch (e) {
@@ -2523,7 +2534,7 @@ function renderPassport(user) {
     }
     
     // Setup share URLs
-    const shareText = `Check out my Base Onchain Passport! 🆔\n• Registered Name: ${user.name}\n• Level: Lv.${levelVal}\n• Base Score: ${scaledScore}\n• Rank: ${rankText}\n• Wallet Age: ${getWalletAgeFormatted(user.walletAge)}\n\nJoin here to get your Base Passport: https://pandus.app/r/${user.name} 🔵🚀`;
+    const shareText = `Check out my Base Onchain Passport! 🆔\n• Registered Name: ${user.name}\n• Level: Lv.${levelVal}\n• Base Score: ${scaledScore}\n• Rank: ${rankText}\n• Wallet Age: ${getWalletAgeFormatted(user.walletAge)}\n\nJoin here to get your Base Passport: ${window.location.origin}/r/${user.name} 🔵🚀`;
     const shareTextEncoded = encodeURIComponent(shareText);
     
     // Redirect properly to X.com
@@ -2532,7 +2543,7 @@ function renderPassport(user) {
     if (btnShareX) btnShareX.href = twitterUrl;
     
     // Redirect properly to Telegram
-    const telegramUrl = `https://t.me/share/url?url=https://pandus.app/r/${user.name}&text=${encodeURIComponent(`Check out my Base Onchain Passport! 🆔\n• Level: Lv.${levelVal}\n• Base Score: ${scaledScore}\n• Rank: ${rankText}\n\nJoin here to get yours:`)}`;
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(`${window.location.origin}/r/${user.name}`)}&text=${encodeURIComponent(`Check out my Base Onchain Passport! 🆔\n• Level: Lv.${levelVal}\n• Base Score: ${scaledScore}\n• Rank: ${rankText}\n\nJoin here to get yours:`)}`;
     const btnShareTg = document.getElementById("btn-share-tg-new");
     if (btnShareTg) btnShareTg.href = telegramUrl;
     
@@ -2571,7 +2582,7 @@ function renderPassport(user) {
         else if (score >= 80) rankText = "TOP 5%";
         else if (score >= 60) rankText = "TOP 15%";
         
-        const tweetText = `Just verified my Base Onchain Passport! 🆔\nMy Base Score is ${score} (${rankText} of all users) 🌐. Check your score and claim your passport here: https://pandus.app/r/${user.name} 🔵🚀`;
+        const tweetText = `Just verified my Base Onchain Passport! 🆔\nMy Base Score is ${score} (${rankText} of all users) 🌐. Check your score and claim your passport here: ${window.location.origin}/r/${user.name} 🔵🚀`;
         const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
         
         window.open(tweetUrl, "_blank");
@@ -2995,7 +3006,18 @@ function renderRealTransactionsPage() {
         const tr = document.createElement("tr");
         const txUrl = `https://basescan.org/tx/${tx.hash}`;
         const shortHash = tx.hash.substring(0, 10) + "..." + tx.hash.substring(tx.hash.length - 8);
-        const timeStr = new Date(parseInt(tx.timeStamp) * 1000).toLocaleString('en-US', {
+        
+        // Handle block Timestamp properly for both Alchemy and Blockscout formats
+        let txTimeMs = 0;
+        if (tx.metadata && tx.metadata.blockTimestamp) {
+            txTimeMs = new Date(tx.metadata.blockTimestamp).getTime();
+        } else if (tx.timeStamp) {
+            txTimeMs = parseInt(tx.timeStamp) * 1000;
+        } else {
+            txTimeMs = Date.now();
+        }
+        
+        const timeStr = new Date(txTimeMs).toLocaleString('en-US', {
             month: 'short',
             day: '2-digit',
             year: 'numeric',
@@ -3004,21 +3026,50 @@ function renderRealTransactionsPage() {
             second: '2-digit'
         });
         
+        // Handle blockNumber properly (blockNum from Alchemy is hex string)
+        let blockNumber = tx.blockNumber || tx.blockNum;
+        if (blockNumber && blockNumber.toString().startsWith("0x")) {
+            blockNumber = parseInt(blockNumber, 16);
+        }
+        if (!blockNumber) blockNumber = "...";
+        
         const valEth = parseFloat(tx.value) || 0;
-        const gasUsed = parseInt(tx.gasUsed || "0");
-        const gasPrice = parseInt(tx.gasPrice || "0");
-        const feeEth = (gasUsed * gasPrice) / 1e18;
+        
+        // Handle Gas Fee properly (Alchemy does not return gasUsed or gasPrice)
+        let feeEth = 0.000021; // fallback standard L2 gas fee
+        if (tx.gasUsed && tx.gasPrice) {
+            const gasUsed = parseInt(tx.gasUsed || "0");
+            const gasPrice = parseInt(tx.gasPrice || "0");
+            feeEth = (gasUsed * gasPrice) / 1e18;
+        }
         
         const isOutgoing = tx.from.toLowerCase() === user.address.toLowerCase();
         const directionBadge = isOutgoing ? `<span class="badge-status status-warning" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 6px;">OUT</span>` : `<span class="badge-status status-qualified" style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 6px;">IN</span>`;
         
         // Find method/function name
         let method = "Transfer";
-        if (tx.input && tx.input !== "0x") {
+        if (tx.actionLabel) {
+            method = tx.actionLabel;
+        } else if (tx.input && tx.input !== "0x") {
             if (tx.functionName) {
                 method = tx.functionName.split("(")[0];
             } else {
                 method = "Contract Call";
+            }
+        } else {
+            // Guess from value and recipient if it matches checkin/mint/game
+            const toAddr = (tx.to || "").toLowerCase().trim();
+            const appRecipient = (window.baseReceiverAddress || "").toLowerCase().trim();
+            const appContract = (window.baseContractAddress || "").toLowerCase().trim();
+            const isToApp = (appRecipient && toAddr === appRecipient) || (appContract && toAddr === appContract);
+            if (isToApp) {
+                if (Math.abs(valEth - 0.000003) < 0.0000005) {
+                    method = "Passport Mint";
+                } else if (Math.abs(valEth - 0.000001) < 0.0000005) {
+                    method = "Daily Check-in";
+                } else if (Math.abs(valEth - 0.000002) < 0.0000005) {
+                    method = "Game Play";
+                }
             }
         }
         
@@ -3030,7 +3081,7 @@ function renderRealTransactionsPage() {
                 </div>
                 <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Method: <strong>${method}</strong></div>
             </td>
-            <td><code style="background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px;">${tx.blockNumber}</code></td>
+            <td><code style="background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px;">${blockNumber}</code></td>
             <td style="font-size: 11px; color: var(--text-secondary);">${timeStr}</td>
             <td>
                 <div style="display: flex; flex-direction: column; gap: 2px; font-family: monospace; font-size: 11px;">
@@ -3126,7 +3177,7 @@ function renderReferralsPage() {
         DOM.referralPageLink.value = "Connect wallet to get referral link";
         if (DOM.btnCopyRefPage) DOM.btnCopyRefPage.disabled = true;
     } else {
-        DOM.referralPageLink.value = `pandus.app/r/${user.name}`;
+        DOM.referralPageLink.value = `${window.location.origin}/r/${user.name}`;
         if (DOM.btnCopyRefPage) DOM.btnCopyRefPage.disabled = false;
     }
     
@@ -3427,7 +3478,7 @@ function syncProfileUI(user, flash = false) {
         if (user.name === "Verify Wallet") {
             DOM.referralLinkInput.value = "Connect wallet to get referral link";
         } else {
-            DOM.referralLinkInput.value = `pandus.app/r/${user.name}`;
+            DOM.referralLinkInput.value = `${window.location.origin}/r/${user.name}`;
         }
     }
 
@@ -4517,7 +4568,7 @@ function initializeEvents() {
     if (promoInviteBtn) {
         promoInviteBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            const link = `pandus.app/r/${PROFILES[APP_STATE.currentUser].name}`;
+            const link = `${window.location.origin}/r/${PROFILES[APP_STATE.currentUser].name}`;
             navigator.clipboard.writeText(link).then(() => {
                 showToast("Referral URL copied to clipboard!", "success");
                 simulateReferralJoin();
@@ -5350,6 +5401,17 @@ function startCountdown() {
 
 // Core App Bootstrapping
 window.addEventListener("DOMContentLoaded", () => {
+    // Check if URL has a referral path /r/username and store it
+    const path = window.location.pathname;
+    if (path.startsWith("/r/")) {
+        const refName = path.substring(3).trim();
+        if (refName) {
+            localStorage.setItem("PANDUS_REFERRER", refName);
+            // Clean up the URL path without reloading the page
+            history.replaceState(null, "", window.location.origin);
+        }
+    }
+
     loadState();
     loadProfile(APP_STATE.currentUser || "fresh");
     initializeEvents();
