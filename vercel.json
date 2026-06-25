@@ -1,6 +1,24 @@
 {
+  "version": 2,
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/$1" }
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "index.css", "use": "@vercel/static" },
+    { "src": "index.js", "use": "@vercel/static" },
+    { "src": "style.css", "use": "@vercel/static" },
+    { "src": "avatar.png", "use": "@vercel/static" },
+    { "src": "passport-bg.jpg", "use": "@vercel/static" },
+    { "src": "wallet-connect.bundle.js", "use": "@vercel/static" },
+    { "src": "galaxy.jpg", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/index.js", "dest": "/index.js" },
+    { "src": "/index.css", "dest": "/index.css" },
+    { "src": "/avatar.png", "dest": "/avatar.png" },
+    { "src": "/passport-bg.jpg", "dest": "/passport-bg.jpg" },
+    { "src": "/wallet-connect.bundle.js", "dest": "/wallet-connect.bundle.js" },
+    { "src": "/style.css", "dest": "/style.css" },
+    { "src": "/galaxy.jpg", "dest": "/galaxy.jpg" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
