@@ -19,6 +19,7 @@
     { "src": "/wallet-connect.bundle.js", "dest": "/wallet-connect.bundle.js" },
     { "src": "/style.css", "dest": "/style.css" },
     { "src": "/galaxy.jpg", "dest": "/galaxy.jpg" },
+    { "src": "/r/(.*)", "status": 302, "headers": { "Location": "/?ref=$1" } },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }

@@ -1484,18 +1484,23 @@ async function fetchOnchainDetails(profileKey) {
             const elapsed = now - Math.floor(lastCheckInTime / 1000);
             const timeRemaining = Math.max(0, 24 * 3600 - elapsed);
             if (timeRemaining > 0) {
-                onchainCheckedInToday = true;
+                user.hasCheckedIn = true;
                 user.checkInTimeRemaining = timeRemaining;
             } else {
+                user.hasCheckedIn = false;
                 user.checkInTimeRemaining = 0;
             }
             user.lastCheckInTimestamp = Math.floor(lastCheckInTime / 1000);
             user.checkInStreak = checkInStreak;
+        } else {
+            user.hasCheckedIn = false;
+            user.checkInTimeRemaining = 0;
+            user.lastCheckInTimestamp = 0;
+            user.checkInStreak = 1;
         }
         
         // Sync user properties with the maximum of local and on-chain calculated data
         user.bxp = Math.max(user.bxp || 0, onchainBxp);
-        user.hasCheckedIn = user.hasCheckedIn || onchainCheckedInToday;
         
         // Reconstruct BXP transactions if empty (e.g. on new device)
         if (!user.bxpTransactions || user.bxpTransactions.length === 0) {
@@ -5401,13 +5406,18 @@ function startCountdown() {
 
 // Core App Bootstrapping
 window.addEventListener("DOMContentLoaded", () => {
-    // Check if URL has a referral path /r/username and store it
+    // Check if URL has a referral path or query parameter and store it
     const path = window.location.pathname;
-    if (path.startsWith("/r/")) {
+    const params = new URLSearchParams(window.location.search);
+    const refParam = params.get("ref");
+    
+    if (refParam) {
+        localStorage.setItem("PANDUS_REFERRER", refParam);
+        history.replaceState(null, "", window.location.origin);
+    } else if (path.startsWith("/r/")) {
         const refName = path.substring(3).trim();
         if (refName) {
             localStorage.setItem("PANDUS_REFERRER", refName);
-            // Clean up the URL path without reloading the page
             history.replaceState(null, "", window.location.origin);
         }
     }
