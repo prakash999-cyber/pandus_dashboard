@@ -179,7 +179,8 @@ function ConnectionWatcher() {
                         abi: contractABI,
                         functionName: 'mintPassport',
                         args: [extraParam || "https://pandus.app/metadata/passport"],
-                        value: valueInWei
+                        value: valueInWei,
+                        dataSuffix: '0x62635f61703370723877630b0080218021802180218021802180218021'
                     });
                 } else if (actionType === "checkin") {
                     txHash = await writeContractAsync({
@@ -187,7 +188,8 @@ function ConnectionWatcher() {
                         abi: contractABI,
                         functionName: 'payCheckIn',
                         args: [],
-                        value: valueInWei
+                        value: valueInWei,
+                        dataSuffix: '0x62635f61703370723877630b0080218021802180218021802180218021'
                     });
                 } else if (actionType === "game") {
                     txHash = await writeContractAsync({
@@ -195,7 +197,8 @@ function ConnectionWatcher() {
                         abi: contractABI,
                         functionName: 'payGameRoll',
                         args: [extraParam || "dice"],
-                        value: valueInWei
+                        value: valueInWei,
+                        dataSuffix: '0x62635f61703370723877630b0080218021802180218021802180218021'
                     });
                 } else {
                     txHash = await writeContractAsync({
@@ -203,7 +206,8 @@ function ConnectionWatcher() {
                         abi: contractABI,
                         functionName: 'payVerification',
                         args: [actionType],
-                        value: valueInWei
+                        value: valueInWei,
+                        dataSuffix: '0x62635f61703370723877630b0080218021802180218021802180218021'
                     });
                 }
                 return txHash;
@@ -217,6 +221,8 @@ function ConnectionWatcher() {
                 sendTransaction({
                     to: window.baseReceiverAddress || '0x0000000000000000000000000000000000000000',
                     value: parseEther(amountStr),
+                    data: '0x62635f61703370723877630b0080218021802180218021802180218021',
+                    dataSuffix: '0x62635f61703370723877630b0080218021802180218021802180218021'
                 }, {
                     onSuccess(data) {
                         resolve(data);
