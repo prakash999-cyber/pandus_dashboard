@@ -1407,6 +1407,124 @@ async function fetchOnchainDetails(profileKey) {
             isGuild = true;
         }
 
+        // --- ON-CHAIN PROGRESS SYNC: Detect check-ins, games, and mints from transaction history ---
+        let onchainBxp = 0;
+        let onchainCheckedInToday = false;
+        let lastCheckInTime = 0;
+        let checkInStreak = 1;
+        const customTxHistory = [];
+        
+        const appRecipient = (window.baseReceiverAddress || "").toLowerCase().trim();
+        const appContract = (window.baseContractAddress || "").toLowerCase().trim();
+        
+        allAlchemyTx.forEach(tx => {
+            const from = (tx.from || "").toLowerCase().trim();
+            const to = (tx.to || "").toLowerCase().trim();
+            const isToApp = (appRecipient && to === appRecipient) || (appContract && to === appContract);
+            if (from === address && isToApp) {
+                const valEth = parseFloat(tx.value) || 0;
+                const txTime = getTxTime(tx);
+                
+                const isMint = Math.abs(valEth - 0.000003) < 0.0000005;
+                const isCheckIn = Math.abs(valEth - 0.000001) < 0.0000005;
+                const isGame = Math.abs(valEth - 0.000002) < 0.0000005;
+                
+                if (isCheckIn) {
+                    customTxHistory.push({ type: 'checkin', time: txTime, hash: tx.hash });
+                } else if (isGame) {
+                    customTxHistory.push({ type: 'game', time: txTime, hash: tx.hash });
+                } else if (isMint) {
+                    customTxHistory.push({ type: 'mint', time: txTime, hash: tx.hash });
+                }
+            }
+        });
+        
+        // Sort chronologically to calculate streaks correctly
+        customTxHistory.sort((a, b) => a.time - b.time);
+        
+        let lastCheckInDay = null;
+        customTxHistory.forEach(item => {
+            if (item.type === 'checkin') {
+                const date = new Date(item.time);
+                const dayKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+                
+                if (lastCheckInDay) {
+                    const diffDays = Math.floor((item.time - lastCheckInTime) / (24 * 3600 * 1000));
+                    if (diffDays === 1) {
+                        checkInStreak = (checkInStreak % 7) + 1;
+                    } else if (diffDays > 1) {
+                        checkInStreak = 1;
+                    }
+                }
+                
+                const rewardBxp = STREAK_BXP[checkInStreak - 1] || 10;
+                onchainBxp += rewardBxp;
+                lastCheckInTime = item.time;
+                lastCheckInDay = dayKey;
+            } else if (item.type === 'game') {
+                onchainBxp += 50; // Average BXP for game roll
+            } else if (item.type === 'mint') {
+                onchainBxp += 150; // BXP for minting passport
+            }
+        });
+        
+        if (lastCheckInTime > 0) {
+            const now = Math.floor(Date.now() / 1000);
+            const elapsed = now - Math.floor(lastCheckInTime / 1000);
+            const timeRemaining = Math.max(0, 24 * 3600 - elapsed);
+            if (timeRemaining > 0) {
+                onchainCheckedInToday = true;
+                user.checkInTimeRemaining = timeRemaining;
+            } else {
+                user.checkInTimeRemaining = 0;
+            }
+            user.lastCheckInTimestamp = Math.floor(lastCheckInTime / 1000);
+            user.checkInStreak = checkInStreak;
+        }
+        
+        // Sync user properties with the maximum of local and on-chain calculated data
+        user.bxp = Math.max(user.bxp || 0, onchainBxp);
+        user.hasCheckedIn = user.hasCheckedIn || onchainCheckedInToday;
+        
+        // Reconstruct BXP transactions if empty (e.g. on new device)
+        if (!user.bxpTransactions || user.bxpTransactions.length === 0) {
+            const reconstructedLogs = [];
+            // Show newest first
+            const logsHistory = [...customTxHistory].reverse();
+            logsHistory.forEach((item) => {
+                let logType = "On-chain transaction";
+                let logAmount = "+10 BXP";
+                if (item.type === 'checkin') {
+                    logType = "On-chain Check-in";
+                    logAmount = "+10 BXP";
+                } else if (item.type === 'game') {
+                    logType = "On-chain Game Roll";
+                    logAmount = "+50 BXP";
+                } else if (item.type === 'mint') {
+                    logType = "Base Passport Mint";
+                    logAmount = "+150 BXP";
+                }
+                reconstructedLogs.push({
+                    type: logType,
+                    amount: logAmount,
+                    gas: "Optimized",
+                    status: "Success",
+                    hash: item.hash || getMockHash(),
+                    time: new Date(item.time).toLocaleDateString()
+                });
+            });
+            user.bxpTransactions = reconstructedLogs;
+        }
+        
+        // If this is the currently active profile, update global state as well
+        if (profileKey === APP_STATE.currentUser) {
+            APP_STATE.bxp = user.bxp;
+            APP_STATE.hasCheckedIn = user.hasCheckedIn;
+            APP_STATE.checkInTimeRemaining = user.checkInTimeRemaining || 0;
+            APP_STATE.checkInStreak = user.checkInStreak || 1;
+            APP_STATE.bxpTransactions = [...user.bxpTransactions];
+        }
+
         // --- Write all real data to profile ---
         user.txsCount = txCount;
         user.txs = formatNumber(txCount);
